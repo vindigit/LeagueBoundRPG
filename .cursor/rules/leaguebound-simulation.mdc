@@ -1,0 +1,10 @@
+---
+description: Leaguebound simulation rules (Markov, stats, BBIQ)
+alwaysApply: true
+---
+
+# Leaguebound Simulation Rules
+
+- **Possessions:** Use Markov Chain logic for basketball possessions.
+- **Stats:** Ground all stats in realistic standard deviations (e.g., do not allow 80% 3PT shooting).
+- **BBIQ:** Treat BBIQ as a multiplier for decision-time and information transparency in the sim.
