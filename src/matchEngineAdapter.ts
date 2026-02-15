@@ -55,6 +55,7 @@ export interface MatchEngineAdapter {
   stepPossession(): AdapterStepOutput;
   runPossessions(possessions: number): AdapterRunOutput;
   getState(): AdapterStepOutput;
+  updateUserInkState(next: Pick<Player, "BankBalance" | "Morale" | "Position">): AdapterStepOutput;
 }
 
 export interface MatchEngineAdapterOptions {
@@ -138,6 +139,33 @@ export const createMatchEngineAdapter = (
       BankBalance: userPlayer.BankBalance,
       Morale: userPlayer.Morale,
       Position: userPlayer.Position as Position,
+    };
+  };
+
+  const updateUserInkState = (
+    next: Pick<Player, "BankBalance" | "Morale" | "Position">,
+  ): AdapterStepOutput => {
+    const userPlayer = getPlayerById(context, options.userPlayerId);
+    if (!userPlayer) {
+      return {
+        state,
+        metrics,
+        userInkState: undefined,
+      };
+    }
+
+    // Persist to canonical Ink-facing fields and compatibility aliases.
+    userPlayer.BankBalance = next.BankBalance;
+    userPlayer.Morale = next.Morale;
+    userPlayer.Position = next.Position;
+    userPlayer.bankBalance = next.BankBalance;
+    userPlayer.morale = next.Morale;
+    userPlayer.position = next.Position;
+
+    return {
+      state,
+      metrics,
+      userInkState: getUserInkState(),
     };
   };
 
@@ -230,5 +258,6 @@ export const createMatchEngineAdapter = (
     stepPossession,
     runPossessions,
     getState,
+    updateUserInkState,
   };
 };
