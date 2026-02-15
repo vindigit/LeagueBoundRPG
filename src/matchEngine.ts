@@ -234,7 +234,8 @@ export const simulatePossession = (
     const receiver = offenseTeam.roster[targetIndex];
     const actionScore =
       average([ballHandlerVision, ballHandlerHandle, ballHandlerBbiq]) +
-      getEnergyModifier(ballHandlerStamina) -
+      getEnergyModifier(ballHandlerStamina) +
+      getBbiqModifier(ballHandlerBbiq) -
       defenseValue -
       getVariance(ballHandlerBbiq, rng);
 
