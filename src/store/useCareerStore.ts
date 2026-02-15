@@ -8,9 +8,11 @@ import {
   type CareerActions,
   type CareerState,
 } from "../types/career";
-import type { Player } from "../types/player";
+import type { Player, PlayerAttributes } from "../types/player";
 
 type CareerStore = CareerState & CareerActions;
+
+const clampAttribute = (value: number): number => Math.min(99, Math.max(0, value));
 
 const defaultPlayer: Player = {
   id: "",
@@ -66,10 +68,43 @@ export const useCareerStore = create<CareerStore>()(
             id: Date.now().toString(),
             name: playerName,
             age: 13,
+            BankBalance: initialCareerState.player.BankBalance,
+            bankBalance: initialCareerState.player.BankBalance,
+            Morale: initialCareerState.player.Morale,
+            morale: initialCareerState.player.Morale,
+            Position: initialCareerState.player.Position,
+            position: initialCareerState.player.Position,
             archetype,
             attributes,
           },
         }));
+      },
+      updateAttribute: (attr, amount) => {
+        set((state) => {
+          const currentValue = state.player.attributes[attr];
+          const nextValue = clampAttribute(currentValue + amount) as PlayerAttributes[typeof attr];
+          return {
+            player: {
+              ...state.player,
+              attributes: {
+                ...state.player.attributes,
+                [attr]: nextValue,
+              },
+            },
+          };
+        });
+      },
+      updateBankBalance: (amount) => {
+        set((state) => {
+          const nextBankBalance = state.player.BankBalance + amount;
+          return {
+            player: {
+              ...state.player,
+              BankBalance: nextBankBalance,
+              bankBalance: nextBankBalance,
+            },
+          };
+        });
       },
       advanceWeek: () => {
         set((state) => ({ currentWeek: state.currentWeek + 1 }));

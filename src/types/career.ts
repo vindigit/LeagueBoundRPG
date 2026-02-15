@@ -1,4 +1,4 @@
-import type { Player, PlayerArchetype } from "./player";
+import type { Player, PlayerArchetype, PlayerAttributes } from "./player";
 
 export enum LeagueLevel {
   MIDDLE_SCHOOL = "MIDDLE_SCHOOL",
@@ -27,6 +27,8 @@ export interface CareerState {
 
 export interface CareerActions {
   initializeCareer(playerName: string, archetype: PlayerArchetype): void;
+  updateAttribute(attr: keyof PlayerAttributes, amount: number): void;
+  updateBankBalance(amount: number): void;
   advanceWeek(): void;
   advanceSeason(): void;
   updateLeagueLevel(level: LeagueLevel): void;
