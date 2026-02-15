@@ -1,22 +1,25 @@
 ---
-description: Leaguebound tech stack and development philosophy (Granularity Protocol, Ink)
+description: Leaguebound tech stack and Granularity Protocol (mandatory)
 alwaysApply: true
 ---
 
-# Leaguebound Stack & Philosophy
+# Leaguebound Stack & Granularity Protocol
 
 ## Technical Stack
 - **Framework:** React Native (Expo)
-- **Language:** TypeScript (Strict mode)
-- **Narrative:** inkjs (Ink)
+- **Language:** TypeScript (Strict)
 - **State:** Zustand (local-first persistence)
-- **Styling:** Tailwind CSS (NativeWind)
+- **Narrative:** inkjs (Ink)
 
-## Granularity Protocol
-- **Small batches only:** Break every task into Micro-Sprints. Never build a whole feature in one go.
-- **Atomic components:** Keep UI components small. If a file exceeds 150 lines, suggest splitting it.
-- **Verification first:** After every logic change, generate a simple test script to verify the math (e.g., sim 100 possessions to check shooting %).
+## Granularity Protocol (MANDATORY)
+1. **NO ONE-SHOTTING:** Never attempt to build a full feature or screen in one prompt.
+2. **ATOMIC TASKS:** Break every request into: 1. Data Types, 2. Logic/Math, 3. Integration.
+3. **VERIFICATION:** After every logic change, create a small node-based test script to verify math/stats.
+4. **ARCHITECTURAL LOCK:** Do not change folder structure without explicit user confirmation.
+
+## Atomic Components
+- Keep UI components small. If a file exceeds 150 lines, suggest splitting it.
 
 ## Ink Integration
 - All narrative logic **MUST** live in `.ink` files.
-- React should only **read state from Ink** and display it. No narrative branching or story logic in React/TS.
+- React only **reads state from Ink** and displays it. No narrative branching or story logic in React/TS.
