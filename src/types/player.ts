@@ -136,10 +136,42 @@ export interface Player {
   id: string;
   name: string;
   age: number;
-  bankBalance: number;
-  morale: number;
-  position: Position;
+  BankBalance: number;
+  Morale: number;
+  Position: Position;
+  bankBalance?: number;
+  morale?: number;
+  position?: Position;
   archetype: PlayerArchetype;
   attributes: PlayerAttributes;
   gameStats: PlayerGameStats;
 }
+
+export type PlayerStateInput = Omit<Player, "BankBalance" | "Morale" | "Position"> & {
+  BankBalance?: number;
+  Morale?: number;
+  Position?: Position;
+  bankBalance?: number;
+  morale?: number;
+  position?: Position;
+};
+
+export const normalizePlayerStateForInk = (player: PlayerStateInput): Player => {
+  const BankBalance = player.BankBalance ?? player.bankBalance;
+  const Morale = player.Morale ?? player.morale;
+  const Position = player.Position ?? player.position;
+
+  if (BankBalance === undefined || Morale === undefined || Position === undefined) {
+    throw new Error("Player state normalization requires balance, morale, and position values.");
+  }
+
+  return {
+    ...player,
+    BankBalance,
+    Morale,
+    Position,
+    bankBalance: BankBalance,
+    morale: Morale,
+    position: Position,
+  };
+};
