@@ -113,6 +113,8 @@ export type Rating0To99 =
 export interface PlayerAttributes {
   shooting: Rating0To99;
   finishing: Rating0To99;
+  vision: Rating0To99;
+  handle: Rating0To99;
   athleticism: Rating0To99;
   defense: Rating0To99;
   rebounding: Rating0To99;
@@ -134,6 +136,8 @@ export interface Player {
   id: string;
   name: string;
   age: number;
+  bankBalance: number;
+  morale: number;
   position: Position;
   archetype: PlayerArchetype;
   attributes: PlayerAttributes;
