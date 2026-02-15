@@ -297,7 +297,15 @@ const proDefenseTeam = mkTeam([
   }),
 ]);
 
-const run = () => {
+const run = async () => {
+  const setupModule = await import("./scripts/setupNodeVerificationEnv.ts");
+  const setupNodeVerificationEnv =
+    setupModule.setupNodeVerificationEnv ?? setupModule.default?.setupNodeVerificationEnv;
+  if (typeof setupNodeVerificationEnv !== "function") {
+    throw new Error("Failed to load setupNodeVerificationEnv.");
+  }
+  await setupNodeVerificationEnv();
+
   const middle = simulate(homeSlasherTeam, middleDefenseTeam, "MIDDLE_SCHOOL", 20260301, 300);
   const pro = simulate(homeSlasherTeam, proDefenseTeam, "PRO", 20260301, 300);
 
@@ -310,4 +318,8 @@ const run = () => {
       : "CHECK TUNING: Pro context did not reduce offensive output as expected.",
   );
 };
-run();
+
+run().catch((error) => {
+  console.error("League scaling verification failed:", error);
+  process.exitCode = 1;
+});

@@ -251,28 +251,43 @@ const runAndReport = (seed) => {
   return { seed, state, metrics, fgPct, assistRate, tovRate };
 };
 
-const primary = runAndReport(20260214);
-console.log("=== Match Engine Verification (Seeded) ===");
-console.log(`Possessions Simulated: ${primary.metrics.possessions}`);
-console.log(`Final Score: HOME ${primary.state.score.home} - AWAY ${primary.state.score.away}`);
-console.log(`FGA/FGM: ${primary.metrics.fga}/${primary.metrics.fgm} (${primary.fgPct.toFixed(1)}%)`);
-console.log(`Assist Rate: ${primary.assistRate.toFixed(1)}%`);
-console.log(`Turnover-like Failure Rate: ${primary.tovRate.toFixed(1)}%`);
-console.log("Score Progression:");
-for (const line of primary.metrics.scoreByCheckpoint) console.log(`- ${line}`);
+const main = async () => {
+  const setupModule = await import("./scripts/setupNodeVerificationEnv.ts");
+  const setupNodeVerificationEnv =
+    setupModule.setupNodeVerificationEnv ?? setupModule.default?.setupNodeVerificationEnv;
+  if (typeof setupNodeVerificationEnv !== "function") {
+    throw new Error("Failed to load setupNodeVerificationEnv.");
+  }
+  await setupNodeVerificationEnv();
 
-const seeds = [20260210, 20260211, 20260212, 20260213, 20260214, 20260215, 20260216, 20260217, 20260218, 20260219];
-const summaries = seeds.map(runAndReport);
-const avgFg = summaries.reduce((sum, item) => sum + item.fgPct, 0) / summaries.length;
-const avgAssist = summaries.reduce((sum, item) => sum + item.assistRate, 0) / summaries.length;
-const avgTov = summaries.reduce((sum, item) => sum + item.tovRate, 0) / summaries.length;
-const avgPossessions = summaries.reduce((sum, item) => sum + item.metrics.possessions, 0) / summaries.length;
-const avgHome = summaries.reduce((sum, item) => sum + item.state.score.home, 0) / summaries.length;
-const avgAway = summaries.reduce((sum, item) => sum + item.state.score.away, 0) / summaries.length;
+  const primary = runAndReport(20260214);
+  console.log("=== Match Engine Verification (Seeded) ===");
+  console.log(`Possessions Simulated: ${primary.metrics.possessions}`);
+  console.log(`Final Score: HOME ${primary.state.score.home} - AWAY ${primary.state.score.away}`);
+  console.log(`FGA/FGM: ${primary.metrics.fga}/${primary.metrics.fgm} (${primary.fgPct.toFixed(1)}%)`);
+  console.log(`Assist Rate: ${primary.assistRate.toFixed(1)}%`);
+  console.log(`Turnover-like Failure Rate: ${primary.tovRate.toFixed(1)}%`);
+  console.log("Score Progression:");
+  for (const line of primary.metrics.scoreByCheckpoint) console.log(`- ${line}`);
 
-console.log("=== Multi-Seed Averages (10 runs) ===");
-console.log(`Avg Possessions: ${avgPossessions.toFixed(1)}`);
-console.log(`Avg FG%: ${avgFg.toFixed(1)}%`);
-console.log(`Avg Assist Rate: ${avgAssist.toFixed(1)}%`);
-console.log(`Avg Turnover-like Failure Rate: ${avgTov.toFixed(1)}%`);
-console.log(`Avg Final Score: HOME ${avgHome.toFixed(1)} - AWAY ${avgAway.toFixed(1)}`);
+  const seeds = [20260210, 20260211, 20260212, 20260213, 20260214, 20260215, 20260216, 20260217, 20260218, 20260219];
+  const summaries = seeds.map(runAndReport);
+  const avgFg = summaries.reduce((sum, item) => sum + item.fgPct, 0) / summaries.length;
+  const avgAssist = summaries.reduce((sum, item) => sum + item.assistRate, 0) / summaries.length;
+  const avgTov = summaries.reduce((sum, item) => sum + item.tovRate, 0) / summaries.length;
+  const avgPossessions = summaries.reduce((sum, item) => sum + item.metrics.possessions, 0) / summaries.length;
+  const avgHome = summaries.reduce((sum, item) => sum + item.state.score.home, 0) / summaries.length;
+  const avgAway = summaries.reduce((sum, item) => sum + item.state.score.away, 0) / summaries.length;
+
+  console.log("=== Multi-Seed Averages (10 runs) ===");
+  console.log(`Avg Possessions: ${avgPossessions.toFixed(1)}`);
+  console.log(`Avg FG%: ${avgFg.toFixed(1)}%`);
+  console.log(`Avg Assist Rate: ${avgAssist.toFixed(1)}%`);
+  console.log(`Avg Turnover-like Failure Rate: ${avgTov.toFixed(1)}%`);
+  console.log(`Avg Final Score: HOME ${avgHome.toFixed(1)} - AWAY ${avgAway.toFixed(1)}`);
+};
+
+main().catch((error) => {
+  console.error("Match engine verification failed:", error);
+  process.exitCode = 1;
+});

@@ -20,6 +20,10 @@
   "homepage": "https://github.com/vindigit/LeagueBoundRPG#readme",
   "dependencies": {
     "@react-native-async-storage/async-storage": "^2.2.0",
+    "inkjs": "^2.3.2",
     "zustand": "^5.0.11"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.0"
   }
 }

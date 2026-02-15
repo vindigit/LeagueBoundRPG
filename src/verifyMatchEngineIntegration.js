@@ -52,7 +52,20 @@ const away = {
 };
 
 const run = async () => {
-  const { createMatchEngineAdapter } = await import("./matchEngineAdapter.ts");
+  const setupModule = await import("./scripts/setupNodeVerificationEnv.ts");
+  const setupNodeVerificationEnv =
+    setupModule.setupNodeVerificationEnv ?? setupModule.default?.setupNodeVerificationEnv;
+  if (typeof setupNodeVerificationEnv !== "function") {
+    throw new Error("Failed to load setupNodeVerificationEnv.");
+  }
+  await setupNodeVerificationEnv();
+
+  const adapterModule = await import("./matchEngineAdapter.ts");
+  const createMatchEngineAdapter =
+    adapterModule.createMatchEngineAdapter ?? adapterModule.default?.createMatchEngineAdapter;
+  if (typeof createMatchEngineAdapter !== "function") {
+    throw new Error("Failed to load createMatchEngineAdapter.");
+  }
 
   const adapter = createMatchEngineAdapter({
     home,

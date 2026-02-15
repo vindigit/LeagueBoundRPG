@@ -40,7 +40,20 @@ const away = {
 };
 
 const run = async () => {
-  const { createMatchEngineStore } = await import("./matchEngineStore.ts");
+  const setupModule = await import("./scripts/setupNodeVerificationEnv.ts");
+  const setupNodeVerificationEnv =
+    setupModule.setupNodeVerificationEnv ?? setupModule.default?.setupNodeVerificationEnv;
+  if (typeof setupNodeVerificationEnv !== "function") {
+    throw new Error("Failed to load setupNodeVerificationEnv.");
+  }
+  await setupNodeVerificationEnv();
+
+  const storeModule = await import("./matchEngineStore.ts");
+  const createMatchEngineStore =
+    storeModule.createMatchEngineStore ?? storeModule.default?.createMatchEngineStore;
+  if (typeof createMatchEngineStore !== "function") {
+    throw new Error("Failed to load createMatchEngineStore.");
+  }
   const autosaves = [];
   const store = createMatchEngineStore({
     onAutoSave: (event) => autosaves.push(event),
