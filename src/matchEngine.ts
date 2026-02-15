@@ -1,6 +1,6 @@
 import type { Player } from "./types/player";
 import type { Team } from "./types/team";
-import * as tuning from "./matchEngineTuning";
+import tuning from "./matchEngineTuning.js";
 
 export type PossessionAction = "pass" | "shoot" | "dribble";
 

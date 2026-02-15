@@ -26,4 +26,4 @@ declare const tuning: {
   threePointMax: number;
 };
 
-export = tuning;
+export default tuning;
