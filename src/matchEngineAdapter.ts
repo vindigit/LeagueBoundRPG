@@ -1,6 +1,7 @@
 import type { Team } from "./types/team.ts";
 import type { Player, PlayerStateInput, Position } from "./types/player.ts";
 import { normalizePlayerStateForInk } from "./types/player.ts";
+import { LeagueLevel } from "./types/career.ts";
 import {
   createSeededRng,
   initializePossession,
@@ -63,6 +64,7 @@ export interface MatchEngineAdapterOptions {
   away: TeamInput;
   userPlayerId: string;
   seed: number;
+  leagueLevel?: LeagueLevel;
   secondsRemaining?: number;
   keyMomentRngChance?: number;
 }
@@ -119,8 +121,9 @@ export const createMatchEngineAdapter = (
     away: normalizeTeamInput(options.away),
   };
   const rng = createSeededRng(options.seed);
+  const leagueLevel = options.leagueLevel ?? LeagueLevel.PRO;
   const keyMomentRngChance = options.keyMomentRngChance ?? 0.08;
-  let state = initializePossession(context, rng, options.secondsRemaining ?? 20 * 60);
+  let state = initializePossession(context, leagueLevel, rng, options.secondsRemaining ?? 20 * 60);
   let metrics: SimMetrics = {
     possessions: 0,
     fga: 0,
@@ -209,7 +212,7 @@ export const createMatchEngineAdapter = (
 
   const stepPossession = (): AdapterStepOutput => {
     const previousState = state;
-    const result = simulatePossession(context, previousState, rng);
+    const result = simulatePossession(context, previousState, leagueLevel, rng);
     metrics = updateMetrics(metrics, result);
     const keyMoment = buildKeyMoment(previousState, result);
     state = {

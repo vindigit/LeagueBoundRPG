@@ -1,5 +1,7 @@
 import type { Player } from "./types/player";
 import type { Team } from "./types/team";
+import { LEAGUE_MODIFIERS } from "./constants/leagueScaling";
+import { LeagueLevel } from "./types/career";
 import tuning from "./matchEngineTuning.js";
 
 export type PossessionAction = "pass" | "shoot" | "dribble";
@@ -45,6 +47,9 @@ const clamp = (value: number, min: number, max: number): number =>
 
 const average = (values: number[]): number =>
   values.reduce((sum, value) => sum + value, 0) / values.length;
+
+export const getScaledAttribute = (value: number, leagueLevel: LeagueLevel): number =>
+  clamp(value * LEAGUE_MODIFIERS[leagueLevel], 0, 99);
 
 export const createSeededRng = (seed: number): (() => number) => {
   let state = (seed >>> 0) || 1;
@@ -115,9 +120,14 @@ export const chooseAction = (
   return weightedChoice(options, rng);
 };
 
-const getDefenseValue = (defenseTeam: Team): number =>
+const getDefenseValue = (defenseTeam: Team, leagueLevel: LeagueLevel): number =>
   average(
-    defenseTeam.roster.map((player) => average([player.attributes.defense, player.attributes.bbiq])),
+    defenseTeam.roster.map((player) => {
+      // Preserve original equal weighting while applying league efficiency scaling.
+      const scaledDefense = getScaledAttribute(player.attributes.defense, leagueLevel);
+      const scaledBbiq = getScaledAttribute(player.attributes.bbiq, leagueLevel);
+      return average([scaledDefense, scaledBbiq]);
+    }),
   );
 
 const getEnergyModifier = (stamina: number): number => (stamina - 50) * tuning.energyModifierScale;
@@ -157,9 +167,10 @@ const getRandomTeammateIndex = (ballHandlerIndex: number, rng: () => number): nu
   return teammates[idx];
 };
 
-const getShotPoints = (shooter: Player, rng: () => number): 2 | 3 => {
+const getShotPoints = (shooter: Player, leagueLevel: LeagueLevel, rng: () => number): 2 | 3 => {
+  const scaledShooting = getScaledAttribute(shooter.attributes.shooting, leagueLevel);
   const threePointChance = clamp(
-    (shooter.attributes.shooting - tuning.threePointOffset) / tuning.threePointDivisor,
+    (scaledShooting - tuning.threePointOffset) / tuning.threePointDivisor,
     tuning.threePointMin,
     tuning.threePointMax,
   );
@@ -185,12 +196,21 @@ const addPoints = (state: PossessionState, offenseKey: "home" | "away", points: 
 export const simulatePossession = (
   context: MatchContext,
   state: PossessionState,
+  leagueLevel: LeagueLevel,
   rng: () => number,
 ): PossessionResult => {
   const { offenseTeam, defenseTeam } = getOffenseAndDefense(context, state);
   const ballHandler = offenseTeam.roster[state.ballHandlerIndex];
-  const defenseValue = getDefenseValue(defenseTeam);
+  const defenseValue = getDefenseValue(defenseTeam, leagueLevel);
   const action = chooseAction(ballHandler, state, rng);
+
+  const ballHandlerShooting = getScaledAttribute(ballHandler.attributes.shooting, leagueLevel);
+  const ballHandlerFinishing = getScaledAttribute(ballHandler.attributes.finishing, leagueLevel);
+  const ballHandlerVision = getScaledAttribute(ballHandler.attributes.vision, leagueLevel);
+  const ballHandlerHandle = getScaledAttribute(ballHandler.attributes.handle, leagueLevel);
+  const ballHandlerAthleticism = getScaledAttribute(ballHandler.attributes.athleticism, leagueLevel);
+  const ballHandlerBbiq = getScaledAttribute(ballHandler.attributes.bbiq, leagueLevel);
+  const ballHandlerStamina = getScaledAttribute(ballHandler.attributes.stamina, leagueLevel);
 
   let madeShot = false;
   let points: 0 | 2 | 3 = 0;
@@ -199,59 +219,63 @@ export const simulatePossession = (
 
   if (action === "shoot") {
     const shotScore =
-      average([ballHandler.attributes.shooting, ballHandler.attributes.finishing]) +
-      getEnergyModifier(ballHandler.attributes.stamina) +
-      getBbiqModifier(ballHandler.attributes.bbiq) -
+      average([ballHandlerShooting, ballHandlerFinishing]) +
+      getEnergyModifier(ballHandlerStamina) +
+      getBbiqModifier(ballHandlerBbiq) -
       defenseValue -
-      getVariance(ballHandler.attributes.bbiq, rng);
+      getVariance(ballHandlerBbiq, rng);
 
     madeShot = rng() <= getShotMakeProbability(shotScore);
     if (madeShot) {
-      points = getShotPoints(ballHandler, rng);
+      points = getShotPoints(ballHandler, leagueLevel, rng);
     }
   } else if (action === "pass") {
     const targetIndex = getRandomTeammateIndex(state.ballHandlerIndex, rng);
     const receiver = offenseTeam.roster[targetIndex];
     const actionScore =
-      average([ballHandler.attributes.vision, ballHandler.attributes.handle, ballHandler.attributes.bbiq]) +
-      getEnergyModifier(ballHandler.attributes.stamina) -
+      average([ballHandlerVision, ballHandlerHandle, ballHandlerBbiq]) +
+      getEnergyModifier(ballHandlerStamina) -
       defenseValue -
-      getVariance(ballHandler.attributes.bbiq, rng);
+      getVariance(ballHandlerBbiq, rng);
 
     const passFailure = rng() <= getFailureProbability(actionScore);
     if (passFailure) {
       turnoverLikeFailure = true;
     } else {
+      const receiverShooting = getScaledAttribute(receiver.attributes.shooting, leagueLevel);
+      const receiverFinishing = getScaledAttribute(receiver.attributes.finishing, leagueLevel);
+      const receiverStamina = getScaledAttribute(receiver.attributes.stamina, leagueLevel);
+      const receiverBbiq = getScaledAttribute(receiver.attributes.bbiq, leagueLevel);
       const receiverShotScore =
-        average([receiver.attributes.shooting, receiver.attributes.finishing]) +
-        getEnergyModifier(receiver.attributes.stamina) +
-        getBbiqModifier(receiver.attributes.bbiq) -
+        average([receiverShooting, receiverFinishing]) +
+        getEnergyModifier(receiverStamina) +
+        getBbiqModifier(receiverBbiq) -
         defenseValue -
-        getVariance(receiver.attributes.bbiq, rng);
+        getVariance(receiverBbiq, rng);
 
       madeShot = rng() <= getShotMakeProbability(receiverShotScore);
       assisted = madeShot;
       if (madeShot) {
-        points = getShotPoints(receiver, rng);
+        points = getShotPoints(receiver, leagueLevel, rng);
       }
     }
   } else {
     const actionScore =
-      average([ballHandler.attributes.handle, ballHandler.attributes.athleticism, ballHandler.attributes.bbiq]) +
-      getEnergyModifier(ballHandler.attributes.stamina) -
+      average([ballHandlerHandle, ballHandlerAthleticism, ballHandlerBbiq]) +
+      getEnergyModifier(ballHandlerStamina) -
       defenseValue -
-      getVariance(ballHandler.attributes.bbiq, rng);
+      getVariance(ballHandlerBbiq, rng);
 
     const dribbleFailure = rng() <= getFailureProbability(actionScore);
     if (dribbleFailure) {
       turnoverLikeFailure = true;
     } else {
       const finishScore =
-        average([ballHandler.attributes.finishing, ballHandler.attributes.athleticism]) +
-        getEnergyModifier(ballHandler.attributes.stamina) +
-        getBbiqModifier(ballHandler.attributes.bbiq) -
+        average([ballHandlerFinishing, ballHandlerAthleticism]) +
+        getEnergyModifier(ballHandlerStamina) +
+        getBbiqModifier(ballHandlerBbiq) -
         defenseValue -
-        getVariance(ballHandler.attributes.bbiq, rng);
+        getVariance(ballHandlerBbiq, rng);
       madeShot = rng() <= getShotMakeProbability(finishScore);
       if (madeShot) {
         points = 2;
@@ -278,11 +302,30 @@ export const simulatePossession = (
 
 export const initializePossession = (
   context: MatchContext,
+  leagueLevel: LeagueLevel,
   rng: () => number,
   secondsRemaining = 20 * 60,
 ): PossessionState => {
-  const homeOvr = calculateTeamOvr(context.home);
-  const awayOvr = calculateTeamOvr(context.away);
+  const getScaledTeamOvr = (team: Team): number =>
+    Math.round(
+      average(
+        team.roster.map((player) =>
+          average([
+            getScaledAttribute(player.attributes.shooting, leagueLevel),
+            getScaledAttribute(player.attributes.finishing, leagueLevel),
+            getScaledAttribute(player.attributes.vision, leagueLevel),
+            getScaledAttribute(player.attributes.handle, leagueLevel),
+            getScaledAttribute(player.attributes.athleticism, leagueLevel),
+            getScaledAttribute(player.attributes.defense, leagueLevel),
+            getScaledAttribute(player.attributes.rebounding, leagueLevel),
+            getScaledAttribute(player.attributes.bbiq, leagueLevel),
+            getScaledAttribute(player.attributes.stamina, leagueLevel),
+          ]),
+        ),
+      ),
+    );
+  const homeOvr = getScaledTeamOvr(context.home);
+  const awayOvr = getScaledTeamOvr(context.away);
   const homeControlChance = clamp(homeOvr / (homeOvr + awayOvr), 0.35, 0.65);
   const homeHasBall = rng() <= homeControlChance;
   return {
@@ -299,9 +342,10 @@ export const runPossessionBatch = (
   context: MatchContext,
   possessions: number,
   seed: number,
+  leagueLevel: LeagueLevel,
 ): { finalState: PossessionState; metrics: SimMetrics } => {
   const rng = createSeededRng(seed);
-  let state = initializePossession(context, rng);
+  let state = initializePossession(context, leagueLevel, rng);
   const metrics: SimMetrics = {
     possessions: 0,
     fga: 0,
@@ -311,7 +355,7 @@ export const runPossessionBatch = (
   };
 
   for (let i = 0; i < possessions && state.secondsRemaining > 0; i += 1) {
-    const result = simulatePossession(context, state, rng);
+    const result = simulatePossession(context, state, leagueLevel, rng);
     metrics.possessions += 1;
     if (!result.turnoverLikeFailure) {
       metrics.fga += 1;
