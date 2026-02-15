@@ -1,6 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
+import { ARCHETYPE_DEFAULTS } from "../constants/archetypes";
 import {
   CareerStatus,
   LeagueLevel,
@@ -56,6 +57,20 @@ export const useCareerStore = create<CareerStore>()(
   persist(
     (set, get) => ({
       ...initialCareerState,
+      initializeCareer: (playerName, archetype) => {
+        const attributes = ARCHETYPE_DEFAULTS[archetype];
+        set(() => ({
+          ...initialCareerState,
+          player: {
+            ...initialCareerState.player,
+            id: Date.now().toString(),
+            name: playerName,
+            age: 13,
+            archetype,
+            attributes,
+          },
+        }));
+      },
       advanceWeek: () => {
         set((state) => ({ currentWeek: state.currentWeek + 1 }));
       },
