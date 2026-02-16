@@ -8,7 +8,8 @@
     "ios": "react-native run-ios",
     "android": "react-native run-android",
     "build": "tsc --noEmit",
-    "test": "jest",
+    "typecheck": "tsc --noEmit",
+    "test": "jest --ci",
     "lint": "eslint . --ext .ts,.tsx"
   },
   "dependencies": {

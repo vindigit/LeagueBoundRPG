@@ -30,7 +30,9 @@ For detailed requirements and implementation plan, see [PRD.md](./PRD.md).
 
 ### Prerequisites
 
-- Node.js >= 18.0.0
+- **Node.js 20.x** (required for CI, recommended for development)
+  - Check version: `node --version`
+  - Download: [https://nodejs.org](https://nodejs.org)
 - npm or yarn
 - React Native development environment (see [React Native docs](https://reactnative.dev/docs/environment-setup))
 
@@ -50,6 +52,12 @@ cd ios && pod install && cd ..
 
 ## Development
 
+### Prerequisites
+
+- Node.js 20.x (required for CI and recommended for development)
+- npm
+- React Native development environment (see [React Native docs](https://reactnative.dev/docs/environment-setup))
+
 ### Available Scripts
 
 ```bash
@@ -63,7 +71,7 @@ npm run ios
 npm run android
 
 # Type check
-npm run build
+npm run typecheck
 
 # Run tests
 npm test
@@ -71,6 +79,24 @@ npm test
 # Lint code
 npm run lint
 ```
+
+### Quality Checks
+
+This project uses automated quality checks to ensure code quality. All checks must pass before merging:
+
+```bash
+# Run all quality checks
+npm run lint        # ESLint checks for code style and potential errors
+npm run typecheck   # TypeScript type checking
+npm run test        # Jest unit tests
+```
+
+**CI/CD:** These checks run automatically on every pull request via GitHub Actions. The CI workflow (`ci.yml`) enforces:
+- ✅ Linting (ESLint)
+- ✅ Type checking (TypeScript)
+- ✅ Unit tests (Jest)
+
+All checks must pass before a PR can be merged.
 
 ### Project Structure
 
@@ -111,6 +137,28 @@ Contributions are welcome! Please follow these guidelines:
 - Follow existing code style and conventions
 - Write tests for new features
 - Update documentation as needed
+- Ensure all tests pass before submitting PR
+
+### Branch Protection (Repository Maintainers)
+
+To enforce quality checks on pull requests, enable branch protection for the `main` branch:
+
+**Steps to enable branch protection:**
+
+1. Go to the repository on GitHub
+2. Navigate to: **Settings** → **Branches** → **Branch protection rules**
+3. Click **Add rule**
+4. Configure the rule:
+   - **Branch name pattern**: `main`
+   - Enable: ✅ **Require a pull request before merging**
+   - Enable: ✅ **Require status checks to pass before merging**
+   - Search for and select: `Quality Checks` (this is the job name from `.github/workflows/ci.yml`)
+   - Optional but recommended:
+     - ✅ **Require branches to be up to date before merging**
+     - ✅ **Require conversation resolution before merging**
+5. Click **Create** or **Save changes**
+
+Once enabled, all PRs to `main` must pass the CI quality checks before merging.
 - Ensure all tests pass before submitting PR
 
 ## Testing
