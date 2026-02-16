@@ -77,7 +77,9 @@ Part of splitting PR #5 into focused PRs for better review.
 
 **Title:** Add Core Domain Types and Constants
 
-**Base:** `main` (or `pr1-scaffold-platform` if merging sequentially)
+**Base:** `main`
+
+**Note:** PR2 requires the dependencies from PR1 (package.json). If PR1 is not merged yet, merge PR1 first or create PR2 based on `pr1-scaffold-platform` branch.
 
 **Description:**
 ```markdown

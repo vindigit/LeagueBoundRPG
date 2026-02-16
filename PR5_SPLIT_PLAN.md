@@ -38,13 +38,16 @@ PR #5 contains 83 changed files with 13,568 additions and 470 deletions. This is
 ### PR2: Domain Model/Types (Core Data Structures)
 **Purpose:** Define the core types, constants, and state management for players, careers, and teams.
 
-**Files (6 files):**
+**Files (9 files):**
 - `src/types/player.ts` - Player data types, attributes, position enums
 - `src/types/career.ts` - Career progression types
 - `src/types/team.ts` - Team types
 - `src/constants/archetypes.ts` - Player archetype definitions
 - `src/constants/leagueScaling.ts` - League scaling formulas
 - `src/store/useCareerStore.ts` - Zustand store for career state
+- `src/components/playerCardUtils.ts` - Player card utilities (domain logic)
+- `package.json` - Updated dependencies
+- `tsconfig.json` - TypeScript configuration
 
 **Dependencies:** PR1 (needs React Native packages)
 
