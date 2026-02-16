@@ -43,8 +43,17 @@ export function NarrativeOverlay() {
   }, [overlayOpacity, panelTranslateY]);
 
   useEffect(() => {
+    const fileName = currentNarrativeFile.trim();
+    if (fileName.length === 0) {
+      // Empty file name means the narrative flow is closing/resetting, not an error.
+      setManager(null);
+      setErrorMessage(null);
+      setStoryState(EMPTY_STORY_STATE);
+      return;
+    }
+
     try {
-      setManager(loadNarrativeInkManager(currentNarrativeFile));
+      setManager(loadNarrativeInkManager(fileName));
       setErrorMessage(null);
     } catch (error) {
       setManager(null);
