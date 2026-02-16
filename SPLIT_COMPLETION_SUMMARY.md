@@ -17,10 +17,10 @@ Created 5 local branches, each with a specific scope:
 | Branch | Files | Description | Base Branch | Status |
 |--------|-------|-------------|-------------|--------|
 | pr1-scaffold-platform | 51 | React Native infrastructure | main | ✅ Ready |
-| pr2-domain-model | 9 | Types, constants, stores | main | ✅ Ready |
+| pr2-domain-model | 9 | Types, constants, stores, utils | main | ✅ Ready |
 | pr3-match-engine | 10 | Basketball simulation | pr2 | ✅ Ready |
 | pr4-narrative-integration | 7 | Ink narrative system | pr2 | ✅ Ready |
-| pr5-ui-components | 13 new, 9 deleted | UI components & screens | pr3 + pr4 | ✅ Ready |
+| pr5-ui-components | 13 new, 9 deleted | UI components & screens | pr3 (merged with pr4) | ✅ Ready |
 
 ### 3. Verification ✅
 - All branches compile successfully with TypeScript

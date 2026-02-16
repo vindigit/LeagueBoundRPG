@@ -94,12 +94,10 @@ PR #5 contains 83 changed files with 13,568 additions and 470 deletions. This is
 ### PR5: UI Components (User Interface)
 **Purpose:** Add UI components for displaying player information, narratives, and screens.
 
-**Files (5 files):**
+**Files (4 new files + removed files):**
 - `src/components/PlayerCard.tsx` - Player card component
-- `src/components/playerCardUtils.ts` - Utilities for player cards
 - `src/components/NarrativeOverlay.tsx` - Narrative overlay component
 - `src/screens/HomeScreen.tsx` - Main home screen
-- `src/scripts/verifyPlayerCardTopAttributes.ts` - Player card verification
 - `App.tsx` - Update to use HomeScreen (replace placeholder)
 - Removed files:
   - `src/app.tsx` (deleted)
