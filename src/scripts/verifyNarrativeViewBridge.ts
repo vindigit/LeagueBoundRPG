@@ -31,3 +31,5 @@ run().catch((error) => {
   console.error("Narrative bridge verification failed:", error);
   process.exitCode = 1;
 });
+
+export {};

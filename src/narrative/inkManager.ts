@@ -1,7 +1,5 @@
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
-import { fileURLToPath } from "node:url";
-import { Compiler } from "inkjs/full";
+import { Story } from "inkjs";
+import practiceCoachStoryJson from "./assets/practice_coach.json";
 import { useCareerStore } from "../store/useCareerStore";
 import type { PlayerAttributes } from "../types/player";
 
@@ -18,6 +16,13 @@ const ATTRIBUTE_KEYS: ReadonlyArray<keyof PlayerAttributes> = [
 ];
 
 const ACTION_PREFIX = "ACTION:";
+type InkStoryJson = Record<string, unknown>;
+export type NarrativeFileName = "practice_coach.ink";
+const PRACTICE_COACH_FILE: NarrativeFileName = "practice_coach.ink";
+
+const NARRATIVE_JSON: Record<NarrativeFileName, InkStoryJson> = {
+  [PRACTICE_COACH_FILE]: practiceCoachStoryJson as InkStoryJson,
+};
 
 export interface InkChoice {
   index: number;
@@ -104,23 +109,6 @@ const toChoices = (story: InkStoryLike): InkChoice[] =>
     text: choice.text,
   }));
 
-const normalizeInkSourceForCompiler = (inkSource: string): string => {
-  const escapedActionTags = inkSource.replace(
-    /^(\s*#\s*ACTION:\s*updateAttribute)\s+\|\s+(.+?)\s+\|\s+(.+)\s*$/gm,
-    "$1 \\| $2 \\| $3",
-  );
-
-  const firstNonEmptyLine = escapedActionTags
-    .split(/\r?\n/)
-    .find((line) => line.trim().length > 0);
-
-  if (firstNonEmptyLine?.trim().startsWith("-> ")) {
-    return escapedActionTags;
-  }
-
-  return `-> coach_aside\n\n${escapedActionTags}`;
-};
-
 export class InkManager {
   private readonly story: InkStoryLike;
 
@@ -163,32 +151,11 @@ export class InkManager {
   }
 }
 
-const createStoryFromInkSource = (inkSource: string): InkStoryLike => {
-  const compiler = new Compiler(inkSource) as {
-    Compile(): InkStoryLike;
-    errors?: string[];
-    warnings?: string[];
-  };
-  try {
-    return compiler.Compile();
-  } catch (error) {
-    const errors = compiler.errors?.join("\n");
-    const warnings = compiler.warnings?.join("\n");
-    const details = [errors, warnings].filter(Boolean).join("\n");
-    const message = details.length > 0 ? `${(error as Error).message}\n${details}` : (error as Error).message;
-    throw new Error(message);
-  }
-};
+const createStoryFromJson = (storyJson: InkStoryJson): InkStoryLike =>
+  new Story(JSON.stringify(storyJson)) as unknown as InkStoryLike;
 
-const defaultInkPath = fileURLToPath(new URL("./practice_coach.ink", import.meta.url));
-const narrativeDirectoryPath = fileURLToPath(new URL("./", import.meta.url));
-
-export const loadPracticeCoachInkManager = (inkPath = defaultInkPath): InkManager => {
-  const inkSource = readFileSync(inkPath, "utf8");
-  const normalizedInkSource = normalizeInkSourceForCompiler(inkSource);
-  const story = createStoryFromInkSource(normalizedInkSource);
-  return new InkManager(story);
-};
+export const loadPracticeCoachInkManager = (): InkManager =>
+  new InkManager(createStoryFromJson(NARRATIVE_JSON[PRACTICE_COACH_FILE]));
 
 export const loadNarrativeInkManager = (fileName: string): InkManager => {
   const sanitizedName = fileName.trim();
@@ -196,6 +163,10 @@ export const loadNarrativeInkManager = (fileName: string): InkManager => {
     throw new Error("Narrative file name must not be empty.");
   }
 
-  const inkPath = resolve(narrativeDirectoryPath, sanitizedName);
-  return loadPracticeCoachInkManager(inkPath);
+  if (!(sanitizedName in NARRATIVE_JSON)) {
+    throw new Error(`Unknown narrative file "${sanitizedName}".`);
+  }
+
+  const storyJson = NARRATIVE_JSON[sanitizedName as NarrativeFileName];
+  return new InkManager(createStoryFromJson(storyJson));
 };

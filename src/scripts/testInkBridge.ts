@@ -38,3 +38,5 @@ run().catch((error) => {
   console.error("Ink bridge verification failed:", error);
   process.exitCode = 1;
 });
+
+export {};

@@ -3,7 +3,7 @@ import {
   type AdapterStepOutput,
   type KeyMomentEvent,
   type MatchEngineAdapterOptions,
-} from "./matchEngineAdapter.ts";
+} from "./matchEngineAdapter";
 
 export type AutoSaveReason = "week_advance" | "key_moment_resolution";
 

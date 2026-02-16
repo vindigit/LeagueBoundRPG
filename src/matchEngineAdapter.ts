@@ -1,7 +1,7 @@
-import type { Team } from "./types/team.ts";
-import type { Player, PlayerStateInput, Position } from "./types/player.ts";
-import { normalizePlayerStateForInk } from "./types/player.ts";
-import { LeagueLevel } from "./types/career.ts";
+import type { Team } from "./types/team";
+import type { Player, PlayerStateInput, Position } from "./types/player";
+import { normalizePlayerStateForInk } from "./types/player";
+import { LeagueLevel } from "./types/career";
 import {
   createSeededRng,
   initializePossession,
@@ -10,7 +10,7 @@ import {
   type PossessionResult,
   type PossessionState,
   type SimMetrics,
-} from "./matchEngine.ts";
+} from "./matchEngine";
 
 type TeamInput = Omit<Team, "roster"> & {
   roster: [PlayerStateInput, PlayerStateInput, PlayerStateInput, PlayerStateInput, PlayerStateInput];
