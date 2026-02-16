@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Compiler } from "inkjs/full";
 import { useCareerStore } from "../store/useCareerStore";
@@ -180,10 +181,21 @@ const createStoryFromInkSource = (inkSource: string): InkStoryLike => {
 };
 
 const defaultInkPath = fileURLToPath(new URL("./practice_coach.ink", import.meta.url));
+const narrativeDirectoryPath = fileURLToPath(new URL("./", import.meta.url));
 
 export const loadPracticeCoachInkManager = (inkPath = defaultInkPath): InkManager => {
   const inkSource = readFileSync(inkPath, "utf8");
   const normalizedInkSource = normalizeInkSourceForCompiler(inkSource);
   const story = createStoryFromInkSource(normalizedInkSource);
   return new InkManager(story);
+};
+
+export const loadNarrativeInkManager = (fileName: string): InkManager => {
+  const sanitizedName = fileName.trim();
+  if (sanitizedName.length === 0) {
+    throw new Error("Narrative file name must not be empty.");
+  }
+
+  const inkPath = resolve(narrativeDirectoryPath, sanitizedName);
+  return loadPracticeCoachInkManager(inkPath);
 };

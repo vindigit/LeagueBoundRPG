@@ -53,6 +53,8 @@ const initialCareerState: CareerState = {
   currentWeek: 1,
   teamId: null,
   isGoatPath: false,
+  view: "HUB",
+  currentNarrativeFile: "",
 };
 
 export const useCareerStore = create<CareerStore>()(
@@ -133,6 +135,12 @@ export const useCareerStore = create<CareerStore>()(
       setCurrentYear: (year) => {
         set(() => ({ currentYear: year }));
       },
+      startNarrative: (fileName) => {
+        set(() => ({
+          view: "NARRATIVE",
+          currentNarrativeFile: fileName,
+        }));
+      },
       hydrateCareer: (state) => {
         set(() => ({ ...state }));
       },
@@ -152,6 +160,8 @@ export const useCareerStore = create<CareerStore>()(
         currentWeek: state.currentWeek,
         teamId: state.teamId,
         isGoatPath: state.isGoatPath,
+        view: state.view,
+        currentNarrativeFile: state.currentNarrativeFile,
       }),
     },
   ),

@@ -14,6 +14,8 @@ export enum CareerStatus {
   AMATEUR_LOCKED = "AMATEUR_LOCKED",
 }
 
+export type CareerView = "HUB" | "NARRATIVE" | "MATCH";
+
 export interface CareerState {
   player: Player;
   leagueLevel: LeagueLevel;
@@ -23,6 +25,8 @@ export interface CareerState {
   currentWeek: number;
   teamId: string | null;
   isGoatPath: boolean;
+  view: CareerView;
+  currentNarrativeFile: string;
 }
 
 export interface CareerActions {
@@ -37,6 +41,7 @@ export interface CareerActions {
   setTeam(teamId: string | null): void;
   setGoatPath(isGoatPath: boolean): void;
   setCurrentYear(year: number): void;
+  startNarrative(fileName: string): void;
   hydrateCareer(state: CareerState): void;
   resetCareer(state: CareerState): void;
 }
