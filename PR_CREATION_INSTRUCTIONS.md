@@ -210,7 +210,7 @@ Then close PR #5.
 
 ### Alternative: Parallel Development
 
-PR2 and PR4 can be developed in parallel as both only depend on PR1.
+PR3 and PR4 can be developed in parallel as both depend on PR2.
 
 ---
 

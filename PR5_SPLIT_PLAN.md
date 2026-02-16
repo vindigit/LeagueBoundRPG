@@ -85,7 +85,7 @@ PR #5 contains 83 changed files with 13,568 additions and 470 deletions. This is
 - `src/scripts/verifyNarrativeViewBridge.ts` - Narrative-view bridge verification
 - Removed: `src/narrative/index.ts` (deleted in PR #5)
 
-**Dependencies:** PR1 (needs React Native packages)
+**Dependencies:** PR2 (needs player types and career store)
 
 **Status:** Not started
 
@@ -137,13 +137,13 @@ Merge PRs in order, with each building on the previous:
 1. PR1 (Scaffold) → main
 2. PR2 (Types) → main (after PR1)
 3. PR3 (Match Engine) → main (after PR2)
-4. PR4 (Narrative) → main (after PR1)
+4. PR4 (Narrative) → main (after PR2)
 5. PR5 (UI) → main (after PR2, PR3, PR4)
 
 ### Option B: Parallel Development
 - PR1 → main first
-- PR2, PR4 can be developed/merged in parallel (both depend only on PR1)
-- PR3 → main after PR2
+- PR2 → main (after PR1)
+- PR3 and PR4 can be developed/merged in parallel (both depend on PR2)
 - PR5 → main last (after all others)
 
 ---

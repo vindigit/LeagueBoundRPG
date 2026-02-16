@@ -82,7 +82,7 @@ Then close PR #5.
 - Easier to identify issues in specific areas
 
 ### Parallel Development
-- PR2 and PR4 can be developed/merged in parallel (both depend only on PR1)
+- PR3 and PR4 can be developed/merged in parallel (both depend on PR2)
 - Multiple team members can review different PRs simultaneously
 
 ### Safer Merging
